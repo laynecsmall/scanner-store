@@ -7,7 +7,7 @@
 FROM ubuntu
 
 # File Author / Maintainer
-MAINTAINER Muneeb Ali (@muneeb)
+MAINTAINER Layne Small
 
 # Update the repository sources list
 RUN apt-get update
@@ -26,14 +26,19 @@ RUN apt-get install -y \
 	apache2 \
 	apache2-utils \
 	libapache2-mod-wsgi \
-	git \
-	python-pip
+	git  \
+  python-pip \
+  python-dev \
+  vim \
+  build-essential
+  libsqlite3-dev \
+  sqlite3
 
 # Create the default directory
 RUN mkdir -p /srv/www
 
 # Clone the app from github and install packages
-RUN git clone https://github.com/muneeb-ali/apache-flask.git /srv/www/app
+RUN git clone https://github.com/laynecsmall/scanner-store /srv/www/app
 RUN cp -f /srv/www/app/apache/config/default.conf /etc/apache2/sites-available/000-default.conf
 RUN pip install -r /srv/www/app/requirements.txt 
 
