@@ -1,7 +1,7 @@
 from sqlalchemy import *
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-import os
+import os, datetime
 
 class Result(declarative_base()):
     __tablename__ = 'results'
@@ -37,14 +37,15 @@ class Device(declarative_base()):
 def setup_db(path):
     if check_db_exist(path):
         db = create_engine("sqlite:///%s" % (path))
-        return sessionmaker(bind=db)
-
     else:
         db = create_engine("sqlite:///%s" % (path))
+        create_db(db)
+    Session = sessionmaker(bind=db)
+    return Session()
 
-        db.echo = False
 
-        devices = Table('devices', MetaData(bind=db),
+def create_db(db_obj):
+        devices = Table('devices', MetaData(bind=db_obj),
           Column('device_id', String(40), primary_key = True),
           Column('device_type', String(40)),
           Column('sensor_x', Integer),
@@ -54,7 +55,7 @@ def setup_db(path):
 
         devices.create()
 
-        results = Table('results', MetaData(bind=db),
+        results = Table('results', MetaData(bind=db_obj),
           Column('id', Integer, primary_key=True, autoincrement=True),
           Column('device_name', String(40)),
           Column('time', DateTime),
@@ -62,16 +63,31 @@ def setup_db(path):
 
         results.create()
 
-        return sessionmaker(bind=db)
-
 def check_db_exist(path):
     return os.path.isfile(path)
 
 def insert_new_result(db_session, result):
     #result = 
-    pass
+    r = Result(device_name=result['device_name'],
+               time=result['time'],
+               raw_results=result['raw_results'])
+    db_session.add(r)
+    db_session.commit()
+
 
 def insert_new_device(db_session, device):
-    pass
+    #result = 
+    d = Device(device_id=device['device_name'],
+               device_type=device['device_type'],
+               sensor_x=device['sensor_x'],
+               sensor_y=device['sensor_y'],
+               create_time=datetime.datetime.now(),
+               last_update=datetime.datetime.now())
+    db_session.add(d)
+    db_session.commit()
+
+def get_latest_result(db_session, device_id):
+    result = db_session.query(Result).filter(Result.device_name==device_id).order_by(Result.id.desc()).first()
+    return result
 
 session = setup_db('scanner_store.db')
