@@ -30,7 +30,7 @@ RUN apt-get install -y \
   python-pip \
   python-dev \
   vim \
-  build-essential
+  build-essential \
   libsqlite3-dev \
   sqlite3
 
