@@ -1,7 +1,9 @@
 from sqlalchemy import *
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 import os
 
-class Result(Base):
+class Result(declarative_base()):
     __tablename__ = 'results'
 
     id = Column(Integer, primary_key=True)
@@ -13,7 +15,7 @@ class Result(Base):
         return "Result(id='%s', device_name='%s', time='%s', raw_results:\n%s)" % (
                 self.id, self.device_name, self.time, self.raw_results )
 
-class Device(Base):
+class Device(declarative_base()):
     __tablename__ = 'devices'
 
     device_id = Column(String, primary_key=True)
@@ -34,11 +36,11 @@ class Device(Base):
 
 def setup_db(path):
     if check_db_exist(path):
-        db = create_engine("sqllite:///%d" % (path))
+        db = create_engine("sqlite:///%s" % (path))
         return sessionmaker(bind=db)
 
     else:
-        db = create_engine("sqllite:///%d" % (path))
+        db = create_engine("sqlite:///%s" % (path))
 
         db.echo = False
 
