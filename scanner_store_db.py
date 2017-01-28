@@ -86,8 +86,26 @@ def insert_new_device(db_session, device):
     db_session.add(d)
     db_session.commit()
 
-def get_latest_result(db_session, device_id):
+def get_latest_result_for_device(db_session, device_id):
     result = db_session.query(Result).filter(Result.device_name==device_id).order_by(Result.id.desc()).first()
     return result
 
-session = setup_db('scanner_store.db')
+def get_latest_n_results_for_device(db_session, device_id, n):
+    result = db_session.query(Result).filter(Result.device_name==device_id).order_by(Result.id.desc()).limit(count).all()
+    return result
+
+def get_latest_result(db_session):
+    result = db_session.query(Result).order_by(Result.id.desc()).first()
+    return result
+
+def get_latest_n_results(db_session, n):
+    result = db_session.query(Result).order_by(Result.id.desc()).limit(count).all()
+    return result
+
+def get_device_details(db_session, device):
+    result = db_session.query(Device).filter(Result.device_id==device).first()
+    return result
+
+def get_all_devices(db_session):
+    return db_session.query(Device).all()
+
