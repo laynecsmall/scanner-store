@@ -10,3 +10,4 @@ DEBUG = True
 DEFAULT_PORT =5000
 DEFAULT_HOST = '0.0.0.0'
 
+DEFAULT_DB_FILE = "scanner-store.db"
