@@ -6,6 +6,7 @@
 """
 
 from flask import Flask, make_response, render_template, jsonify, request
+from flask_sqlalchemy import SQLAlchemy
 from scanner_store_db import *
 from config import DEFAULT_DB_FILE
 
@@ -16,6 +17,17 @@ db = setup_db(DEFAULT_DB_FILE)
 from commontools import log
 
 import pdb
+
+def setup_db(path, app):
+    app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///%s" % (path)
+    if check_db_exist(path):
+        db = SQLAlchemy(app)
+    else:
+        db = SQLAlchemy(app)
+        create_db(db)
+    Session = sessionmaker(bind=db)
+    return Session()
+
 
 #-----------------------------------
 @app.route('/')
