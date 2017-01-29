@@ -57,26 +57,32 @@ def new_device():
 #-----------------------------------
 #-----------------------------------
 @app.route('/results/latest_for_device/<device_name>')
-def latest_for_device():
-	return render_template('index.html')
+def latest_for_device(device_name):
+    result =  get_latest_result_for_device(db, device_name)  
+    return make_response(jsonify(result.to_dict()), 200)
 
 #-----------------------------------
 #-----------------------------------
-@app.route('/latest_n_for_device/<n>/<device_name>')
-def latest_n_for_device():
-	return render_template('index.html')
+@app.route('/results/latest_n_for_device/<n>/<device_name>')
+def latest_n_for_device(n, device_name):
+    result =  get_latest_n_results_for_device(db, device_name,n)  
+    out = {"responses":[x.to_dict() for x in result]}
+
+    return make_response(jsonify(out), 200)
 
 #-----------------------------------
 #-----------------------------------
-@app.route('/get/device/details/<device>')
-def details_for_device():
-	return render_template('index.html')
+@app.route('/device/details/<device>')
+def details_for_device(device):
+    return make_response(jsonify(get_device_details(db, device).to_dict()), 200)
 
 #-----------------------------------
 #-----------------------------------
-@app.route('/get/device/all')
+@app.route('/device/all')
 def details_all_devices():
-	return render_template('index.html')
+    result = get_all_devices(db)
+    out = {"devices": [x.to_dict() for x in result]}
+    return make_response(jsonify(out), 200)
 
 #-----------------------------------
 @app.errorhandler(500)

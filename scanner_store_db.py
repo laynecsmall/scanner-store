@@ -3,6 +3,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os, datetime
 
+import pdb
+
 class Result(declarative_base()):
     __tablename__ = 'results'
 
@@ -14,6 +16,13 @@ class Result(declarative_base()):
     def __repr__(self):
         return "Result(id='%s', device_name='%s', time='%s', raw_results:\n%s)" % (
                 self.id, self.device_name, self.time, self.raw_results )
+
+    def to_dict(self):
+        return {"id": self.id,
+                "device_name": self.device_name,
+                "time": self.time.isoformat(),
+                "raw_results": self.raw_results}
+
 
 class Device(declarative_base()):
     __tablename__ = 'devices'
@@ -33,6 +42,14 @@ class Device(declarative_base()):
                 self.sensor_y,
                 self.create_time.isoformat(),
                 self.last_update.isoformat())
+
+    def to_dict(self):
+        return {"device_id": self.device_id,
+                "device_type": self.device_type,
+                "sensor_x": self.sensor_x,
+                "sensor_y": self.sensor_y,
+                "create_time": self.create_time.isoformat(),
+                "last_update": self.last_update.isoformat()}
 
 def setup_db(path):
     if check_db_exist(path):
@@ -95,7 +112,7 @@ def get_latest_result_for_device(db_session, device_id):
     return result
 
 def get_latest_n_results_for_device(db_session, device_id, n):
-    result = db_session.query(Result).filter(Result.device_name==device_id).order_by(Result.id.desc()).limit(count).all()
+    result = db_session.query(Result).filter(Result.device_name==device_id).order_by(Result.id.desc()).limit(n).all()
     return result
 
 def get_latest_result(db_session):
@@ -107,7 +124,7 @@ def get_latest_n_results(db_session, n):
     return result
 
 def get_device_details(db_session, device):
-    result = db_session.query(Device).filter(device).first()
+    result = db_session.query(Device).filter_by(device_id = device).first()
     return result
 
 def get_all_devices(db_session):
