@@ -7,6 +7,7 @@
 
 from flask import Flask, make_response, render_template, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import MetaData, create_engine, Table, Column, String, Integer, DateTime
 from config import DEFAULT_DB_FILE
 
 
@@ -19,29 +20,30 @@ def setup_db(path, app):
     if check_db_exist(path):
         db = SQLAlchemy(app)
     else:
-        db = SQLAlchemy(app)
+        db = create_engine("sqlite:///%s" % (path))
         create_db(db)
+        db = SQLAlchemy(app)
     return db
 
 
 def create_db(db_obj):
-        devices = Table('devices', MetaData(bind=db_obj),
-          Column('device_id', String(40), primary_key = True),
-          Column('device_type', String(40)),
-          Column('sensor_x', Integer),
-          Column('sensor_y', Integer),
-          Column('create_time', DateTime),
-          Column('last_update', DateTime))
+    devices = Table('devices', MetaData(bind=db_obj),
+      Column('device_id', String(40), primary_key = True),
+      Column('device_type', String(40)),
+      Column('sensor_x', Integer),
+      Column('sensor_y', Integer),
+      Column('create_time', DateTime),
+      Column('last_update', DateTime))
 
-        devices.create()
+    devices.create()
 
-        results = Table('results', MetaData(bind=db_obj),
-          Column('id', Integer, primary_key=True, autoincrement=True),
-          Column('device_name', String(40)),
-          Column('time', DateTime),
-          Column('raw_results', String))
+    results = Table('results', MetaData(bind=db_obj),
+      Column('id', Integer, primary_key=True, autoincrement=True),
+      Column('device_name', String(40)),
+      Column('time', DateTime),
+      Column('raw_results', String))
 
-        results.create()
+    results.create()
 
 def check_db_exist(path):
     return os.path.isfile(path)
