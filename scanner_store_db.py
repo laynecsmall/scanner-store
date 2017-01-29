@@ -73,7 +73,8 @@ def insert_new_result(db_session, result):
                raw_results=result['raw_results'])
     db_session.add(r)
 
-    d = Device.update().where(device_name == result['device_name']).values(latest_result=datetime.datetime.now())
+    db_session.query(Device).filter_by(device_id=result['device_name']).update({"latest_result":datetime.datetime.now()})
+
     db_session.execute(d)
     db_session.commit()
 
@@ -106,7 +107,7 @@ def get_latest_n_results(db_session, n):
     return result
 
 def get_device_details(db_session, device):
-    result = db_session.query(Device).filter(Device.device_id==device).first()
+    result = db_session.query(Device).filter(result.device_id==device).first()
     return result
 
 def get_all_devices(db_session):
