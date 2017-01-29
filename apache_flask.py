@@ -7,16 +7,12 @@
 
 from flask import Flask, make_response, render_template, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
-from scanner_store_db import *
 from config import DEFAULT_DB_FILE
 
-app = Flask(__name__)
-
-db = setup_db(DEFAULT_DB_FILE)
 
 from commontools import log
 
-import pdb
+import os, datetime
 
 def setup_db(path, app):
     app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///%s" % (path)
@@ -25,9 +21,128 @@ def setup_db(path, app):
     else:
         db = SQLAlchemy(app)
         create_db(db)
-    Session = sessionmaker(bind=db)
-    return Session()
+    return db
 
+
+def create_db(db_obj):
+        devices = Table('devices', MetaData(bind=db_obj),
+          Column('device_id', String(40), primary_key = True),
+          Column('device_type', String(40)),
+          Column('sensor_x', Integer),
+          Column('sensor_y', Integer),
+          Column('create_time', DateTime),
+          Column('last_update', DateTime))
+
+        devices.create()
+
+        results = Table('results', MetaData(bind=db_obj),
+          Column('id', Integer, primary_key=True, autoincrement=True),
+          Column('device_name', String(40)),
+          Column('time', DateTime),
+          Column('raw_results', String))
+
+        results.create()
+
+def check_db_exist(path):
+    return os.path.isfile(path)
+
+def insert_new_result(db_session, result):
+    #add result
+    r = Result(device_name=result['device_name'],
+               time=result['time'],
+               raw_results=result['raw_results'])
+    db_session.add(r)
+
+    #update last_updated time in devices table
+    db_session.query(Device).filter_by(device_id=result['device_name']).update({"last_update":datetime.datetime.now()})
+
+    db_session.commit()
+
+
+def insert_new_device(db_session, device):
+    #result = 
+    d = Device(device_id=device['device_name'],
+               device_type=device['device_type'],
+               sensor_x=device['sensor_x'],
+               sensor_y=device['sensor_y'],
+               create_time=datetime.datetime.now(),
+               last_update=datetime.datetime.now())
+    db_session.add(d)
+    db_session.commit()
+
+def get_latest_result_for_device(db_session, device_id):
+    result = db_session.query(Result).filter(Result.device_name==device_id).order_by(Result.id.desc()).first()
+    return result
+
+def get_latest_n_results_for_device(db_session, device_id, n):
+    result = db_session.query(Result).filter(Result.device_name==device_id).order_by(Result.id.desc()).limit(n).all()
+    return result
+
+def get_latest_result(db_session):
+    result = db_session.query(Result).order_by(Result.id.desc()).first()
+    return result
+
+def get_latest_n_results(db_session, n):
+    result = db_session.query(Result).order_by(Result.id.desc()).limit(n).all()
+    return result
+
+def get_device_details(db_session, device):
+    result = db_session.query(Device).filter_by(device_id = device).first()
+    return result
+
+def get_all_devices(db_session):
+    return db_session.query(Device).all()
+
+
+app = Flask(__name__)
+
+db = setup_db(DEFAULT_DB_FILE, app)
+
+class Result(db.Model):
+    __tablename__ = 'results'
+
+    id = db.Column(db.Integer, primary_key=True)
+    device_name = db.Column(db.String)
+    time = db.Column(db.DateTime)
+    raw_results = db.Column(db.String)
+
+    def __repr__(self):
+        return "Result(id='%s', device_name='%s', time='%s', raw_results:\n%s)" % (
+                self.id, self.device_name, self.time, self.raw_results )
+
+    def to_dict(self):
+        return {"id": self.id,
+                "device_name": self.device_name,
+                "time": self.time.isoformat(),
+                "raw_results": self.raw_results}
+
+
+class Device(db.Model):
+    __tablename__ = 'devices'
+
+    device_id = db.Column(db.String, primary_key=True)
+    device_type = db.Column(db.String)
+    sensor_x = db.Column(db.Integer)
+    sensor_y = db.Column(db.Integer)
+    create_time = db.Column(db.DateTime)
+    last_update = db.Column(db.DateTime)
+
+    def __repr__(self):
+        return "Device(id='%s', device_type='%s', x:y=%d:%d, created='%s', last_updated='%s" % (
+                self.device_id,
+                self.device_type,
+                self.sensor_x,
+                self.sensor_y,
+                self.create_time.isoformat(),
+                self.last_update.isoformat())
+
+    def to_dict(self):
+        return {"device_id": self.device_id,
+                "device_type": self.device_type,
+                "sensor_x": self.sensor_x,
+                "sensor_y": self.sensor_y,
+                "create_time": self.create_time.isoformat(),
+                "last_update": self.last_update.isoformat()}
 
 #-----------------------------------
 @app.route('/')
@@ -107,3 +222,4 @@ def internal_error(error):
 @app.errorhandler(404)
 def not_found(error):
 	return make_response(jsonify( { 'error': 'Not found' } ), 404)
+
