@@ -27,14 +27,64 @@
         <table>
           <tr>
             <th> Endpoint </th>
+            <th> Method </th>
             <th> Description </th>
           </tr>
 
           <tr>
             <td> / </td>
+            <td> GET </td>
             <td> This page, description and help </td>
           </tr>
 
+          <tr>
+            <td> /new/result/ </td>
+            <td> POST </td>
+            <td> send a new result. Post form should have: 
+              <list>
+              <ul> device_name </ul>
+              <ul> time </ul>
+              <ul> raw_results </ul>
+              </list>
+            </td>
+          </tr>
+
+          <tr>
+            <td> /new/device/ </td>
+            <td> POST </td>
+            <td> Create a record for new device. Post form should have: 
+              <list>
+              <ul> device_name </ul>
+              <ul> device_type </ul>
+              <ul> sensor_x </ul>
+              <ul> sensor_y </ul>
+              </list>
+            </td>
+          </tr>
+
+          <tr>
+            <td> /get/results/latest_for_device/&gt;device_name&lt; </td>
+            <td> GET </td>
+            <td> returns the latest result submitted for &gt;device_name&lt; </td>
+          </tr>
+
+          <tr>
+            <td> /get/results/latest_n_for_device/&gt;n&lt;/&gt;device_name&lt; </td>
+            <td> GET </td>
+            <td> returns the latest n results submitted for &gt;device_name&lt; </td>
+          </tr>
+
+          <tr>
+            <td> /get/device/details/&gt;device&lt;</td>
+            <td> GET </td>
+            <td> returns the details for &gt;device&lt;</td>
+          </tr>
+
+          <tr>
+            <td> /get/device/all</td>
+            <td> GET </td>
+            <td> returns the details for all registered devices</td>
+          </tr>
 
         </table>
         {% endblock %}
