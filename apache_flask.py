@@ -22,7 +22,7 @@ def index():
 
 #-----------------------------------
 #-----------------------------------
-@app.route('/new/result', method=['POST'])
+@app.route('/new/result')
 def new_result():
     if request.method == 'POST':
         if sorted(request.form.keys) == sorted(['device_name','time','raw_results']):
@@ -38,32 +38,32 @@ def new_result():
 
 #-----------------------------------
 #-----------------------------------
-@app.route('/new/device', method=['POST'])
-def index():
+@app.route('/new/device')
+def new_device():
 	return render_template('index.html')
 
 #-----------------------------------
 #-----------------------------------
 @app.route('/results/latest_for_device/<device_name>')
-def index():
+def latest_for_device():
 	return render_template('index.html')
 
 #-----------------------------------
 #-----------------------------------
 @app.route('/latest_n_for_device/<n>/<device_name>')
-def index():
+def latest_n_for_device():
 	return render_template('index.html')
 
 #-----------------------------------
 #-----------------------------------
 @app.route('/get/device/details/<device>')
-def index():
+def details_for_device():
 	return render_template('index.html')
 
 #-----------------------------------
 #-----------------------------------
 @app.route('/get/device/all')
-def index():
+def details_all_devices():
 	return render_template('index.html')
 
 #-----------------------------------
