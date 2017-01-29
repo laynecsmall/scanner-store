@@ -18,13 +18,18 @@
 </head>
 
 <body>
-
-  <div class="template">
-        {% block content %}
+  <div class="container">
+    <h1>Scanner-store api documentation</h1>
+      {% block content %}
+      <div id="description" >
+        <p>
         This is the scanner store interface, used to store and retrieve data from the SmartCities scanner device.
         Routes are as follows:
-
-        <table>
+        </p>
+      </div>
+      <br />
+      <div id="table">
+        <table class="table table-bordered table-hover">
           <tr>
             <th> Endpoint </th>
             <th> Method </th>
@@ -88,6 +93,7 @@
 
         </table>
         {% endblock %}
+      </div>
   </div>
 
 </body> 
