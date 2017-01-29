@@ -12,7 +12,7 @@ from config import DEFAULT_DB_FILE
 
 from commontools import log
 
-import os, datetime
+import os, datetime, pdb
 
 def setup_db(path, app):
     app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///%s" % (path)
@@ -48,51 +48,50 @@ def check_db_exist(path):
 
 def insert_new_result(db_session, result):
     #add result
-    r = Result(device_name=result['device_name'],
-               time=result['time'],
-               raw_results=result['raw_results'])
-    db_session.add(r)
+    r = Result(result['device_name'],
+               result['time'],
+               result['raw_results'])
+    db_session.session.add(r)
 
     #update last_updated time in devices table
-    db_session.query(Device).filter_by(device_id=result['device_name']).update({"last_update":datetime.datetime.now()})
+    Device.query.filter_by(device_id=result['device_name']).update({"last_update":datetime.datetime.now()})
 
-    db_session.commit()
+    db_session.session.commit()
 
 
 def insert_new_device(db_session, device):
     #result = 
-    d = Device(device_id=device['device_name'],
-               device_type=device['device_type'],
-               sensor_x=device['sensor_x'],
-               sensor_y=device['sensor_y'],
-               create_time=datetime.datetime.now(),
-               last_update=datetime.datetime.now())
-    db_session.add(d)
-    db_session.commit()
+    d = Device(device['device_name'],
+               device['device_type'],
+               device['sensor_x'],
+               device['sensor_y'],
+               datetime.datetime.now(),
+               datetime.datetime.now())
+    db_session.session.add(d)
+    db_session.session.commit()
 
 def get_latest_result_for_device(db_session, device_id):
-    result = db_session.query(Result).filter(Result.device_name==device_id).order_by(Result.id.desc()).first()
+    result = Result.query.filter(Result.device_name==device_id).order_by(Result.id.desc()).first()
     return result
 
 def get_latest_n_results_for_device(db_session, device_id, n):
-    result = db_session.query(Result).filter(Result.device_name==device_id).order_by(Result.id.desc()).limit(n).all()
+    result = Result.query.filter(Result.device_name==device_id).order_by(Result.id.desc()).limit(n).all()
     return result
 
 def get_latest_result(db_session):
-    result = db_session.query(Result).order_by(Result.id.desc()).first()
+    result = Result.query.order_by(Result.id.desc()).first()
     return result
 
 def get_latest_n_results(db_session, n):
-    result = db_session.query(Result).order_by(Result.id.desc()).limit(n).all()
+    result = Result.query.order_by(Result.id.desc()).limit(n).all()
     return result
 
 def get_device_details(db_session, device):
-    result = db_session.query(Device).filter_by(device_id = device).first()
+    result = Device.query.filter_by(device_id = device).first()
     return result
 
 def get_all_devices(db_session):
-    return db_session.query(Device).all()
-
+    return Device.query.all()
 
 app = Flask(__name__)
 
@@ -105,6 +104,11 @@ class Result(db.Model):
     device_name = db.Column(db.String)
     time = db.Column(db.DateTime)
     raw_results = db.Column(db.String)
+
+    def __init__(self,  device_name, time, raw_results):
+        self.device_name = device_name
+        self.time = time
+        self.raw_results = raw_results
 
     def __repr__(self):
         return "Result(id='%s', device_name='%s', time='%s', raw_results:\n%s)" % (
@@ -126,6 +130,14 @@ class Device(db.Model):
     sensor_y = db.Column(db.Integer)
     create_time = db.Column(db.DateTime)
     last_update = db.Column(db.DateTime)
+
+    def __init__(self, device_id, device_type, sensor_x, sensor_y, create_time, last_update):
+        self.device_id = device_id
+        self.device_type = device_type
+        self.sensor_x = sensor_x
+        self.sensor_y = sensor_y
+        self.create_time = create_time
+        self.last_update = last_update
 
     def __repr__(self):
         return "Device(id='%s', device_type='%s', x:y=%d:%d, created='%s', last_updated='%s" % (
