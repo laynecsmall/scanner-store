@@ -47,9 +47,9 @@
             <td> POST </td>
             <td> send a new result. Post form should have: 
               <list>
-              <ul> device_name </ul>
-              <ul> time </ul>
-              <ul> raw_results </ul>
+              <ul> device_name  - the device id </ul>
+              <ul> time  - a datetime in iso format</ul>
+              <ul> raw_results - the results from the scanner</ul>
               </list>
             </td>
           </tr>
@@ -59,10 +59,10 @@
             <td> POST </td>
             <td> Create a record for new device. Post form should have: 
               <list>
-              <ul> device_name </ul>
-              <ul> device_type </ul>
-              <ul> sensor_x </ul>
-              <ul> sensor_y </ul>
+              <ul> device_name - the device id</ul>
+              <ul> device_type - a string identifying the type of device</ul>
+              <ul> sensor_x - pad x dimension as an integer</ul>
+              <ul> sensor_y - pad y dimension as an integer</ul>
               </list>
             </td>
           </tr>
