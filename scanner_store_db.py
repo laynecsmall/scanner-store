@@ -67,15 +67,15 @@ def check_db_exist(path):
     return os.path.isfile(path)
 
 def insert_new_result(db_session, result):
-    #result = 
+    #add result
     r = Result(device_name=result['device_name'],
                time=result['time'],
                raw_results=result['raw_results'])
     db_session.add(r)
 
-    db_session.query(Device).filter_by(device_id=result['device_name']).update({"latest_result":datetime.datetime.now()})
+    #update last_updated time in devices table
+    db_session.query(Device).filter_by(device_id=result['device_name']).update({"last_update":datetime.datetime.now()})
 
-    db_session.execute(d)
     db_session.commit()
 
 
@@ -103,11 +103,11 @@ def get_latest_result(db_session):
     return result
 
 def get_latest_n_results(db_session, n):
-    result = db_session.query(Result).order_by(Result.id.desc()).limit(count).all()
+    result = db_session.query(Result).order_by(Result.id.desc()).limit(n).all()
     return result
 
 def get_device_details(db_session, device):
-    result = db_session.query(Device).filter(result.device_id==device).first()
+    result = db_session.query(Device).filter(device).first()
     return result
 
 def get_all_devices(db_session):
