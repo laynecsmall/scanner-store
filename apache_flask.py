@@ -5,7 +5,7 @@
 	:license: MIT, see LICENSE for more details.
 """
 
-from flask import Flask, make_response, render_template, jsonify
+from flask import Flask, make_response, render_template, jsonify, request
 from scanner_store_db import *
 from config import DEFAULT_DB_FILE
 
@@ -14,6 +14,8 @@ app = Flask(__name__)
 db = setup_db(DEFAULT_DB_FILE)
 
 from commontools import log
+
+import pdb
 
 #-----------------------------------
 @app.route('/')
@@ -25,9 +27,9 @@ def index():
 @app.route('/new/result',  methods=['POST'])
 def new_result():
     if request.method == 'POST':
-        if sorted(request.form.keys) == sorted(['device_name','time','raw_results']):
+        if sorted(request.form.viewkeys()) == sorted(['device_name','time','raw_results']):
             insert_new_result(db, {"device_name": request.form['device_name'],
-                                   "time":request.form['time'],
+                                   "time":datetime.datetime.strptime(request.form['time'], "%Y-%m-%dT%H:%M:%S.%f"),
                                    "raw_results": request.form['raw_results']})
             return make_response(jsonify( { 'success': 'result stored' } ), 200)
         else:
@@ -41,7 +43,7 @@ def new_result():
 @app.route('/new/device', methods=['POST'])
 def new_device():
     if request.method == 'POST':
-        if sorted(request.form.keys) == sorted(['device_name','device_type','sensor_x', 'sensor_y']):
+        if sorted(request.form.viewkeys()) == sorted(['device_name','device_type','sensor_x', 'sensor_y']):
             insert_new_device(db, {"device_name": request.form['device_name'],
                                    "device_type": request.form['device_type'],
                                    "sensor_x": request.form['sensor_x'],
