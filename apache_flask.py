@@ -169,12 +169,14 @@ def index():
 def new_result():
     if request.method == 'POST':
         if sorted(request.form.viewkeys()) == sorted(['device_name','time','raw_results']):
-            insert_new_result(db, {"device_name": request.form['device_name'],
-                                   "time":datetime.datetime.strptime(request.form['time'], "%Y-%m-%dT%H:%M:%S.%f"),
-                                   "raw_results": request.form['raw_results']})
+
+            results = {"device_name": request.form['device_name'],
+                                   "time":datetime.datetime.strptime(request.form['time'], "%Y-%m-%d %H:%M:%S.%f"),
+                                   "raw_results": request.form['raw_results']}
+            insert_new_result(db, results )
             return make_response(jsonify( { 'success': 'result stored' } ), 200)
         else:
-            return make_response(jsonify( { 'failure': 'bad request' } ), 400)
+            return make_response(jsonify( { 'failure': 'bad request: incorrect variables' } ), 400)
     else:
             return make_response(jsonify( { 'failure': 'unsupported method' } ), 400)
 
