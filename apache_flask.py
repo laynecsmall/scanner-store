@@ -40,6 +40,7 @@ def create_db(db_obj):
     results = Table('results', MetaData(bind=db_obj),
       Column('id', Integer, primary_key=True, autoincrement=True),
       Column('device_name', String(40)),
+      Column('tag', String(50)),
       Column('time', DateTime),
       Column('raw_results', String))
 
@@ -51,6 +52,7 @@ def check_db_exist(path):
 def insert_new_result(db_session, result):
     #add result
     r = Result(result['device_name'],
+               result['tag'],
                result['time'],
                result['raw_results'])
     db_session.session.add(r)
@@ -104,21 +106,24 @@ class Result(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     device_name = db.Column(db.String)
+    tag = db.Column(db.String)
     time = db.Column(db.DateTime)
     raw_results = db.Column(db.String)
 
-    def __init__(self,  device_name, time, raw_results):
+    def __init__(self,  device_name, tag, time, raw_results):
         self.device_name = device_name
+        self.tag = tag
         self.time = time
         self.raw_results = raw_results
 
     def __repr__(self):
-        return "Result(id='%s', device_name='%s', time='%s', raw_results:\n%s)" % (
-                self.id, self.device_name, self.time, self.raw_results )
+        return "Result(id='%s', device_name='%s', tag='%s',  time='%s', raw_results:\n%s)" % (
+                self.id, self.device_name, self.tag, self.time, self.raw_results )
 
     def to_dict(self):
         return {"id": self.id,
                 "device_name": self.device_name,
+                "tag": self.tag,
                 "time": self.time.isoformat(),
                 "raw_results": self.raw_results}
 
@@ -161,18 +166,19 @@ class Device(db.Model):
 #-----------------------------------
 @app.route('/')
 def index():
-	return render_template('index.html')
+    return render_template('index.html')
 
 #-----------------------------------
 #-----------------------------------
 @app.route('/new/result',  methods=['POST'])
 def new_result():
     if request.method == 'POST':
-        if sorted(request.form.viewkeys()) == sorted(['device_name','time','raw_results']):
+        if sorted(request.form.viewkeys()) == sorted(['device_name','tag', 'time','raw_results']):
 
             results = {"device_name": request.form['device_name'],
-                                   "time":datetime.datetime.strptime(request.form['time'], "%Y-%m-%d %H:%M:%S.%f"),
-                                   "raw_results": request.form['raw_results']}
+                       "tag": request.form['tag'], 
+                       "time":datetime.datetime.strptime(request.form['time'], "%Y-%m-%d %H:%M:%S.%f"),
+                       "raw_results": request.form['raw_results']}
             insert_new_result(db, results )
             return make_response(jsonify( { 'success': 'result stored' } ), 200)
         else:
