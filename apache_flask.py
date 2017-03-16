@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-	:author: Muneeb Ali | http://muneebali.com
+	:author: Layne Small
 	:license: MIT, see LICENSE for more details.
 """
 
